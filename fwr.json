@@ -1,0 +1,7 @@
+{
+    "port": "4321",
+    "ext": ["go"],
+    "dir": "go",
+    "command": "go run main.go",
+    "command_path": "go"
+}
