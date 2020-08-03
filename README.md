@@ -4,6 +4,8 @@ This tool will watch given files and runs command on file changes.
 
 ## Config
 
+**create fwr.json file in root directory**
+
 ```json
 {
     "port": "4321",
