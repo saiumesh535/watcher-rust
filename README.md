@@ -1,4 +1,4 @@
-## File Watcher
+## File Watcher (Experimental)
 
 This tool will watch given files and runs command on file changes.
 
