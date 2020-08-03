@@ -6,6 +6,8 @@ This tool will watch given files and runs command on file changes.
 
 **create fwr.json file in root directory**
 
+**Download executables from release**
+
 ```json
 {
     "port": "4321",
