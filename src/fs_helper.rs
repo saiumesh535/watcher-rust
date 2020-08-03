@@ -3,7 +3,7 @@ use serde_json::from_str;
 use std::{
     ffi::OsStr,
     fs::{read_dir, read_to_string},
-    path::{PathBuf},
+    path::PathBuf,
 };
 
 fn read_file(path: &str) -> String {
@@ -23,12 +23,24 @@ fn should_consider_extension(extensions: &Vec<String>, file_extension: Option<&O
     return false;
 }
 
+fn get_last_instance(path: &str) -> String {
+    let split = path.split("/").collect::<Vec<&str>>();
+    split[split.len() - 1].to_string()
+}
+
 fn get_watch_paths(paths: &mut Vec<PathBuf>, src_path: PathBuf, config: &Config) {
     if src_path.is_dir() {
         let dir = read_dir(src_path).unwrap();
         for file in dir {
             let entry = file.unwrap();
             if entry.path().is_dir() {
+                // check fot ignore dir
+                if config.ignore_folders != None {
+                    let last_instance = get_last_instance(entry.path().as_path().to_str().unwrap());
+                    if config.ignore_folders.as_ref().unwrap().contains(&last_instance) {
+                        continue;
+                    }
+                }
                 get_watch_paths(paths, entry.path(), config);
                 continue;
             }

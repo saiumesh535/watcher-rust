@@ -6,10 +6,9 @@ import (
 	"net/http"
 )
 
-
 func main() {
-    http.HandleFunc("/s", lol.Hello)
-    if err := http.ListenAndServe("localhost:4321", nil); err != nil {
+	http.HandleFunc("/s", lol.Hello)
+	if err := http.ListenAndServe("localhost:4321", nil); err != nil {
 		fmt.Println("gey!!")
 	}
 }

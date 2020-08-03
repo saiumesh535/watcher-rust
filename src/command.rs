@@ -47,28 +47,61 @@ fn kill_pids(pids: &Vec<String>) {
 }
 
 fn run_and_wait(config: Config) {
-    loop {
-        let command = Command::new("cmd.exe")
-            .current_dir(config.command_path.as_str())
-            .args(&["/C", config.command.as_str()])
-            .spawn();
-        if command.is_err() {
-            panic!(
-                "error while running init command {}",
-                command.err().unwrap()
-            );
-        };
-        // here unwrap is fine
-        if command.unwrap().wait().is_err() {
-            panic!("error while waiting for init command");
-        };
-        println!("wait is done");
+    if cfg!(target_os = "windows") {
+        loop {
+            let command = Command::new("cmd.exe")
+                .current_dir(config.command_path.as_str())
+                .args(&["/C", config.command.as_str()])
+                .spawn();
+            if command.is_err() {
+                panic!(
+                    "error while running init command {}",
+                    command.err().unwrap()
+                );
+            };
+            // here unwrap is fine
+            if command.unwrap().wait().is_err() {
+                panic!("error while waiting for init command");
+            };
+            println!("wait is done");
+        }
+    } else {
+        loop {
+            let split_command: Vec<&str> = config.command.split(" ").collect::<Vec<&str>>();
+            let command = Command::new(split_command[0])
+                .current_dir(config.command_path.as_str())
+                .args(&split_command[1..])
+                .spawn();
+            if command.is_err() {
+                panic!("error while running commmand {}", command.err().unwrap())
+            }
+            // wait for command
+            if command.unwrap().wait().is_err() {
+                panic!("error while waiting")
+            }
+            println!("wait is done")
+        }
     }
 }
 
-fn kill_and_run(config: Config) {
-    let pids = get_pids(config.port.as_str());
-    kill_pids(&pids);
+fn kill(config: Config) {
+    if cfg!(target_os = "windows") {
+        let pids = get_pids(config.port.as_str());
+        kill_pids(&pids);
+    } else {
+        // kill port on linux
+        let command = format!(
+            "kill -9 $(lsof -t -i:{} -sTCP:LISTEN)",
+            config.port.as_str()
+        );
+        println!("command {}", command);
+        let cmd = Command::new("bash")
+            .args(&["-c", command.as_str()])
+            .output();
+        if cmd.is_err() {
+            panic!("error while killing port {}", cmd.err().unwrap());
+        }
+    }
 }
 
 pub fn run_init_command(rx: Receiver<()>, config: Config) {
@@ -78,6 +111,6 @@ pub fn run_init_command(rx: Receiver<()>, config: Config) {
     });
     loop {
         let _ = rx.recv().unwrap();
-        kill_and_run(config.clone());
+        kill(config.clone());
     }
 }

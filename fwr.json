@@ -3,5 +3,6 @@
     "ext": ["go"],
     "dir": "go",
     "command": "go run main.go",
-    "command_path": "go"
+    "command_path": "go",
+    "ignore_folders": []
 }
